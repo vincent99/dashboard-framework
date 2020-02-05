@@ -1,10 +1,6 @@
-import { normalizeType } from '@/plugins/norman/normalize';
-
 const cache = {};
 
 export function lookup(type) {
-  type = normalizeType(type).replace(/\//g, '');
-
   let impl = cache[type];
 
   if ( impl ) {

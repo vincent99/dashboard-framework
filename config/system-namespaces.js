@@ -1,10 +1,13 @@
-export default [
+import { addObject } from '@/utils/array';
+
+const namespaces = [
   'kube-system',
-  'cattle-system',
-  'rio-system',
-  'cattle-global-data',
   'kube-node-lease',
   'kube-public',
-  'linkerd',
-  'tekton-pipelines',
 ];
+
+export function add(name) {
+  addObject(namespaces, name);
+}
+
+export default namespaces;

@@ -33,10 +33,13 @@ if ( resourceBase && !resourceBase.endsWith('/') ) {
   resourceBase += '/';
 }
 
-console.log(`Mode: ${ dev ? 'Development' : 'Production' }`);
+const pl = process.env.PL || 'rancher';
+
+console.log(`Build: ${ dev ? 'Development' : 'Production' }`);
 console.log(`Router Base Path: ${ routerBasePath || '(none)' }`);
 console.log(`Resource Base URL: ${ resourceBase || '(none)' }`);
 console.log(`API: ${ api }`);
+console.log(`PL: ${ pl }`);
 
 if ( dev ) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -44,7 +47,13 @@ if ( dev ) {
 
 module.exports = {
   dev,
-  version,
+
+  // Configuration visible to the client, https://nuxtjs.org/api/configuration-env
+  env: {
+    version,
+    dev,
+    pl,
+  },
 
   buildDir: dev ? '.nuxt' : '.nuxt-prod',
 
@@ -96,10 +105,6 @@ module.exports = {
     }
   },
 
-  buildModules: [
-    '@nuxt/typescript-build',
-  ],
-
   render: {
     bundleRenderer: {
       directives: {
@@ -143,7 +148,7 @@ module.exports = {
     '@nuxtjs/eslint-module',
     'cookie-universal-nuxt',
     'portal-vue/nuxt',
-    '~/plugins/norman/rehydrate-all',
+    '~/plugins/steve/rehydrate-all',
   ],
 
   // Vue plugins

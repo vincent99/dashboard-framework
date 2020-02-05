@@ -9,8 +9,6 @@ export const LOGGED_OUT = 'logged-out';
 export const TIMED_OUT = 'timed-out';
 export const AUTH_TEST = 'test';
 export const BACK_TO = 'back-to';
-export const GITHUB_CODE = 'code';
-export const GITHUB_NONCE = 'state';
 
 // GENERAL
 export const EDIT_YAML = 'as-yaml';
@@ -32,10 +30,7 @@ export const _PREVIEW = 'preview';
 export const _CLONE = 'clone';
 export const _STAGE = 'stage';
 
+// FileDiff
 export const DIFF = 'diff';
 export const _UNIFIED = 'unified';
 export const _SPLIT = 'split';
-
-// Edit Service
-export const ADD_SIDECAR = 'add-sidecar';
-export const EDIT_CONTAINER = 'container';

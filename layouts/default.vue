@@ -1,28 +1,24 @@
-
 <script>
 import { mapState } from 'vuex';
 import { addObject, removeObject } from '@/utils/array';
-import { explorerPackage, clusterPackage, rioPackage, settingsPackage } from '@/config/packages';
 import { mapPref, DEV, THEME, EXPANDED_GROUPS } from '@/store/prefs';
 import ActionMenu from '@/components/ActionMenu';
 import NamespaceFilter from '@/components/nav/NamespaceFilter';
 // import ClusterSwitcher from '@/components/nav/ClusterSwitcher';
-import ShellSocket from '@/components/ContainerExec/ShellSocket';
-import PromptRemove from '@/components/PromptRemove';
 import Group from '@/components/nav/Group';
 import Footer from '@/components/nav/Footer';
 import { COUNT, RANCHER } from '@/config/types';
+import { getVendor, getProduct } from '@/config/private-label';
 
 export default {
 
   components: {
     // ClusterSwitcher,
-    PromptRemove,
+    // PromptRemove,
     Footer,
     NamespaceFilter,
     ActionMenu,
     Group,
-    ShellSocket,
   },
 
   middleware: ['authenticated'],
@@ -32,20 +28,23 @@ export default {
 
     return {
       bodyAttrs: { class: `theme-${ theme } overflow-hidden dashboard-body` },
-      title:     'Rio Dashboard',
+      title:     `${ getVendor() } ${ getProduct() }`,
     };
   },
 
   data() {
     return { packages: [] };
   },
+
   computed: {
     ...mapState(['preloaded']),
     dev:            mapPref(DEV),
     expandedGroups: mapPref(EXPANDED_GROUPS),
 
     principal() {
-      return this.$store.getters['rancher/byId'](RANCHER.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
+      const id = this.$store.getters['auth/principalId'];
+
+      return this.$store.getters['auth/principalFor'](id);
     },
 
     counts() {

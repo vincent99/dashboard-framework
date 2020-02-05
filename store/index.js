@@ -1,12 +1,8 @@
-import Norman from '@/plugins/norman';
-import { COUNT, NAMESPACE, RANCHER } from '@/config/types';
 import { CLUSTER as CLUSTER_PREF, NAMESPACES } from '@/store/prefs';
 import SYSTEM_NAMESPACES from '@/config/system-namespaces';
+import { preloadHandlers, switchHandlers } from '@/config/clusters';
 
-export const plugins = [
-  Norman({ namespace: 'cluster', baseUrl: '/k8s/clusters/local/v1' }), // @TODO cluster-specific URL
-  Norman({ namespace: 'rancher', baseUrl: '/v3' })
-];
+export const plugins = [];
 
 export const state = () => {
   return {
@@ -54,15 +50,18 @@ export const mutations = {
 
 export const actions = {
 
-  clearNorman({ commit }) {
-    commit('cluster/removeAll');
-    commit('rancher/removeAll');
+  async switchCluster(ctx) {
+    const { commit } = ctx;
+
+    await Promise.all(switchHandlers(ctx));
     commit('unloaded');
   },
 
-  async preload({
-    state, getters, commit, dispatch
-  }) {
+  async preload(ctx) {
+    const {
+      state, getters, commit, dispatch
+    } = ctx;
+
     if ( state.preloaded ) {
       return;
     }
@@ -70,13 +69,8 @@ export const actions = {
     console.log('Preloading...');
 
     await Promise.all([
+      ...preloadHandlers(ctx),
       dispatch('prefs/loadCookies'),
-      // ctx.store.dispatch('k8s/loadAll'),
-      dispatch('rancher/findAll', { type: RANCHER.PRINCIPAL, opt: { url: 'principals' } }),
-      dispatch('cluster/loadSchemas'),
-      dispatch('cluster/findAll', { type: COUNT, opt: { url: 'counts' } }),
-      dispatch('cluster/findAll', { type: NAMESPACE, opt: { url: 'core.v1.namespaces' } })
-      //      dispatch('cluster/findAll', { type: POD, opt: { url: 'core.v1.pods' } }),
     ]);
 
     commit('updateNamespaces', getters['prefs/get'](NAMESPACES));

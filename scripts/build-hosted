@@ -17,8 +17,11 @@ echo "BRANCH: ${COMMIT_BRANCH:-<none>}"
 echo "TAG: ${GIT_TAG:-<none>}"
 DIR=${GIT_TAG:-$COMMIT_BRANCH}
 
-BASE=https://releases.rancher.com/dashboard/${DIR}
+PROJECT=$(basename $(pwd))
 
-echo "Building for ${BASE}..."
+BASE="${BASE:-https://releases.rancher.com/${PROJECT}}"
+RESOURCE_BASE="${BASE}/${DIR}"
 
-OUTPUT_DIR=dist/${DIR} ROUTER_BASE="/dashboard" RESOURCE_BASE="${BASE}" yarn run build --spa
+echo "Building for ${RESOURCE_BASE}..."
+
+OUTPUT_DIR=dist/${DIR} ROUTER_BASE="/dashboard" RESOURCE_BASE="${RESOURCE_BASE}" yarn run build --spa

@@ -11,8 +11,6 @@ import TextAreaAutoGrow from '@/components/form/TextAreaAutoGrow';
 /*
   @TODO
   - Paste
-  - Read from file
-  - Multiline
   - Concealed value
 */
 

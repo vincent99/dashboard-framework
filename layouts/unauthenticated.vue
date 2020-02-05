@@ -1,6 +1,7 @@
 
 <script>
 import { THEME } from '@/store/prefs';
+import { getVendor, getProduct } from '@/config/private-label';
 
 export default {
   head() {
@@ -8,7 +9,7 @@ export default {
 
     return {
       bodyAttrs: { class: `theme-${ theme } dashboard-body` },
-      title:     'Rio Dashboard',
+      title:     `${ getVendor() } ${ getProduct() }`,
     };
   },
 };

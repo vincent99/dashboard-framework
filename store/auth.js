@@ -41,8 +41,8 @@ export const mutations = {
   },
 
   loggedOut(state) {
-    // Note: plugin/norman/index watches for this mutation
-    // to automatically disconnect subscribe sockets.
+    // Note: plugins/steve/index and other stores can watch
+    // for this mutation to automatically disconnect subscribe sockets.
 
     state.loggedIn = false;
     state.principalId = null;
@@ -223,6 +223,6 @@ export const actions = {
     }
 
     commit('loggedOut');
-    dispatch('clearNorman', null, { root: true });
+    dispatch('switchCluster', null, { root: true });
   }
 };

@@ -1,10 +1,10 @@
 <script>
-import labeledFormElement from '@/mixins/labeled-form-element';
+import LabeledFormElement from '@/mixins/labeled-form-element';
 import LabeledInput from '@/components/form/LabeledInput';
 import LabeledSelect from '@/components/form/LabeledSelect';
 export default {
   components: { LabeledInput, LabeledSelect },
-  mixins:     [labeledFormElement],
+  mixins:     [LabeledFormElement],
   props:      {
     textLabel: {
       type:    String,

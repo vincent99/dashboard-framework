@@ -73,11 +73,6 @@ export default {
     cursor: pointer;
     color: var(--input-label);
 
-    &:first-child {
-      // border-top: 0;
-      // padding-top: 0;
-    }
-
     > H6 {
       color: var(--input-label);
     }

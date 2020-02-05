@@ -2,14 +2,6 @@ import { EventTarget } from 'event-target-shim';
 import { isSafari } from '@/utils/platform';
 import { addParam } from '@/utils/url';
 
-declare global {
-  interface WebSocket {
-
-    sockId: number;
-    metadata: Object;
-  }
-}
-
 let sockId = 1;
 let warningShown = false;
 let wasConnected = false;
@@ -30,22 +22,23 @@ const STATE_CLOSING = 'closing';
 const STATE_RECONNECTING = 'reconnecting';
 
 export default class Socket extends EventTarget {
-  url: string;
-  autoReconnect: boolean = true;
-  frameTimeout: number = 32000;
-  metadata: object = {};
+  url;
+  autoReconnect = true;
+  frameTimeout = 32000;
+  metadata = {};
 
-  private socket: WebSocket | null = null;
-  private state: string = STATE_DISCONNECTED;
-  private framesReceived: number = 0;
-  private frameTimer: any;
-  private reconnectTimer: any;
-  private tries: number = 0;
-  private disconnectCbs: Array<Function> = [];
-  private disconnectedAt: number = 0;
-  private closingId: number = 0;
+  // "Private"
+  socket = null;
+  state = STATE_DISCONNECTED;
+  framesReceived = 0;
+  frameTimer;
+  reconnectTimer;
+  tries = 0;
+  disconnectCbs = [];
+  disconnectedAt = 0;
+  closingId = 0;
 
-  constructor(url: string, autoReconnect: boolean = true) {
+  constructor(url, autoReconnect = true) {
     super();
 
     if ( !url.match(/wss?:\/\//) ) {
@@ -60,7 +53,7 @@ export default class Socket extends EventTarget {
     this.autoReconnect = autoReconnect;
   }
 
-  connect(metadata: object = {}) {
+  connect(metadata = {}) {
     if ( this.socket ) {
       console.error('Socket refusing to connect while another socket exists');
 
@@ -78,47 +71,47 @@ export default class Socket extends EventTarget {
 
     socket.sockId = id;
     socket.metadata = this.metadata;
-    socket.onmessage = this.onmessage.bind(this);
-    socket.onopen = this.opened.bind(this);
-    socket.onerror = this.error.bind(this);
-    socket.onclose = this.closed.bind(this);
+    socket.onmessage = this._onmessage.bind(this);
+    socket.onopen = this._opened.bind(this);
+    socket.onerror = this._error.bind(this);
+    socket.onclose = this._closed.bind(this);
 
     this.socket = socket;
     this.state = STATE_CONNECTING;
   }
 
-  send(data: any) {
+  send(data) {
     if ( this.socket && this.state === STATE_CONNECTED ) {
       this.socket.send(data);
     }
   }
 
-  disconnect(cb: Function) {
+  disconnect(cb) {
     if ( cb ) {
       this.disconnectCbs.push(cb);
     }
 
     this.autoReconnect = false;
-    this.close();
+    this._close();
   }
 
-  reconnect(metadata: object) {
+  reconnect(metadata = {}) {
     Object.assign(this.metadata, metadata);
 
     if ( this.state === STATE_CONNECTING ) {
-      this.log('Ignoring reconnect for socket in connecting');
+      this._log('Ignoring reconnect for socket in connecting');
 
       return;
     }
 
     if ( this.socket ) {
-      this.close();
+      this._close();
     } else {
       this.connect(metadata);
     }
   }
 
-  getMetadata(): Object {
+  getMetadata() {
     if ( this.socket ) {
       return this.socket.metadata;
     } else {
@@ -126,7 +119,7 @@ export default class Socket extends EventTarget {
     }
   }
 
-  getId(): Number {
+  getId() {
     if ( this.socket ) {
       return this.socket.sockId;
     } else {
@@ -134,7 +127,8 @@ export default class Socket extends EventTarget {
     }
   }
 
-  protected close() {
+  // "Private"
+  _close() {
     const socket = this.socket;
 
     if ( !socket ) {
@@ -142,26 +136,26 @@ export default class Socket extends EventTarget {
     }
 
     try {
-      this.log('closing');
+      this._log('closing');
       this.closingId = socket.sockId;
       socket.onopen = null;
       socket.onerror = null;
       socket.onmessage = null;
       socket.close();
     } catch (e) {
-      this.log('Socket exception', e);
+      this._log('Socket exception', e);
       // Continue anyway...
     }
 
     this.state = STATE_CLOSING;
   }
 
-  protected opened() {
-    this.log('opened');
+  _opened() {
+    this._log('opened');
     const now = (new Date()).getTime();
 
     const at = this.disconnectedAt;
-    let after: Number = 0;
+    let after = 0;
 
     if ( at ) {
       after = now - at;
@@ -174,12 +168,12 @@ export default class Socket extends EventTarget {
     const e = new CustomEvent(EVENT_CONNECTED, { detail: { tries: this.tries, after } });
 
     this.dispatchEvent(e);
-    this.resetWatchdog();
+    this._resetWatchdog();
     clearTimeout(this.reconnectTimer);
   }
 
-  protected onmessage(event) {
-    this.resetWatchdog();
+  _onmessage(event) {
+    this._resetWatchdog();
     this.tries = 0;
     this.framesReceived++;
 
@@ -188,26 +182,26 @@ export default class Socket extends EventTarget {
     this.dispatchEvent(e);
   }
 
-  protected resetWatchdog() {
+  _resetWatchdog() {
     clearTimeout(this.frameTimer);
 
     const timeout = this.frameTimeout;
 
     if ( timeout && this.state === STATE_CONNECTED) {
       this.frameTimer = setTimeout(() => {
-        this.log('Socket watchdog expired after', timeout, 'closing');
-        this.close();
+        this._log('Socket watchdog expired after', timeout, 'closing');
+        this._close();
         this.dispatchEvent(new Event(EVENT_FRAME_TIMEOUT));
       }, timeout);
     }
   }
 
-  protected error() {
+  _error() {
     this.closingId = (this.socket ? this.socket.sockId : 0);
-    this.log('error');
+    this._log('error');
   }
 
-  protected closed() {
+  _closed() {
     console.log(`Socket ${ this.closingId } closed`);
 
     this.closingId = 0;
@@ -255,7 +249,7 @@ export default class Socket extends EventTarget {
     }
   }
 
-  protected log(...args: any[]) {
+  _log(...args) {
     args.unshift('Socket');
 
     args.push(`(state=${ this.state }, id=${ this.socket ? this.socket.sockId : 0 })`);

@@ -4,10 +4,10 @@ import { mapPref, GROUP_RESOURCES } from '@/store/prefs';
 import ButtonGroup from '@/components/ButtonGroup';
 import SortableTable from '@/components/SortableTable';
 import {
-  headersFor,
   NAME, NAME_UNLINKED,
   NAMESPACE_NAME, NAMESPACE_NAME_UNLINKED,
   NAMESPACE_NAME_IMAGE, NAME_IMAGE,
+  AGE,
 } from '@/config/table-headers';
 
 export default {
@@ -146,6 +146,46 @@ export default {
     },
   },
 };
+
+function headersFor(schema) {
+  const out = [];
+  const attributes = schema.attributes || {};
+  const columns = attributes.columns;
+  const namespaced = attributes.namespaced;
+
+  let hasName = false;
+
+  for ( const col of columns ) {
+    if ( col.format === 'name' && col.field === 'metadata.name' ) {
+      hasName = true;
+      out.push(namespaced ? NAMESPACE_NAME : NAME);
+    } else if ( col.format === 'date' && col.field === 'metadata.creationTimestamp' ) {
+      out.push(AGE);
+    } else {
+      let formatter, width;
+
+      if ( col.format === 'date' || col.type === 'date' ) {
+        formatter = 'Date';
+        width = 120;
+      }
+
+      out.push({
+        name:  col.name.toLowerCase(),
+        label: col.name,
+        value: col.field.startsWith('.') ? `$${ col.field }` : col.field,
+        sort:  [col.field],
+        formatter,
+        width,
+      });
+    }
+  }
+
+  if ( !hasName ) {
+    out.unshift(namespaced ? NAMESPACE_NAME : NAME);
+  }
+
+  return out;
+}
 </script>
 
 <template>

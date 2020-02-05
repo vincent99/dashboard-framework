@@ -30,17 +30,6 @@ export function suppressContextMenu(event) {
   return event.ctrlKey && event.button === 2;
 }
 
-// Only intended to work for Mobile Safari at the moment...
-export function version() {
-  const match = userAgent.match(/\s+Version\/([0-9.]+)/);
-
-  if ( match ) {
-    return parseFloat(match[1]);
-  }
-
-  return null;
-}
-
 export const isGecko = userAgent.includes('Gecko/');
 export const isBlink = userAgent.includes('Chrome/');
 export const isWebKit = !isBlink && userAgent.includes('AppleWebKit/');

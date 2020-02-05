@@ -1,13 +1,11 @@
 <script>
 import { mapGetters } from 'vuex';
-import { options } from '@/config/footer';
+import { leftItems, rightItems } from '@/config/footer';
 import { mapPref, DEV } from '@/store/prefs';
-
-const VERSION = process.env.VERSION || 'dev';
 
 export default {
   data() {
-    return { version: VERSION };
+    return { version: process.env.version };
   },
 
   computed: {
@@ -23,13 +21,12 @@ export default {
       return this.dev;
     },
 
-    pl() {
-      // @TODO PL support
-      return 'rancher';
+    left() {
+      return leftItems();
     },
 
-    options() {
-      return options(this.pl);
+    right() {
+      return rightItems();
     }
   },
 
@@ -46,13 +43,25 @@ export default {
   <div class="footer">
     <div>{{ version }}</div>
 
-    <div v-for="(value, name) in options" :key="name">
-      <a v-t="name" :href="value" target="_blank" />
+    <div v-for="opt in left" :key="opt.id">
+      <a
+        v-t="opt.translationKey"
+        :href="opt.url"
+        :target="opt.external ? '_blank' : ''"
+        :rel="opt.external ? 'nofollow noopener noreferrer' : ''"
+      >{{ opt.label }}</a>
     </div>
 
     <div class="space" />
 
-    <div><a v-t="'footer.download'" href="https://github.com/rancher/rio#quick-start" target="_blank" /></div>
+    <div v-for="opt in right" :key="opt.id">
+      <a
+        v-t="opt.translationKey"
+        :href="opt.url"
+        :target="opt.external ? '_blank' : ''"
+        :rel="opt.external ? 'nofollow noopener noreferrer' : ''"
+      >{{ opt.label }}</a>
+    </div>
 
     <div v-if="showLocale">
       <v-popover

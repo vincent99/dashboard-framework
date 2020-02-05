@@ -8,7 +8,7 @@ import { proxyFor } from './resource-proxy';
 import { keyFieldFor } from './normalize';
 import { isArray } from '@/utils/array';
 
-function NormanFactory(namespace, baseUrl) {
+function SteveFactory(namespace, baseUrl) {
   return {
     namespaced: true,
 
@@ -41,7 +41,7 @@ export default (config = {}) => {
   config.baseUrl = config.baseUrl || `/${ namespace }`;
 
   return function(store) {
-    const inst = NormanFactory(namespace, config.baseUrl);
+    const inst = SteveFactory(namespace, config.baseUrl);
 
     store.registerModule(namespace, inst);
     store.commit(`${ namespace }/applyConfig`, config);
